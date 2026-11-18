@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090a10">
+  <title>Zoll</title>
+  <script src="https://js.puter.com/v2/"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --text: #f7f6ff;
+      --muted: #aaa9bd;
+      --line: #ffffff20;
+      --glass: #ffffff0c;
+      --accent: #b6a4ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 18% 0%, #634ac04a, transparent 38%),
+        radial-gradient(ellipse at 92% 84%, #31689d35, transparent 36%),
+        linear-gradient(145deg, #12121e, #090a10 58%, #10131d);
+    }
+    button, textarea, select { font: inherit; }
+    .app { display: flex; flex-direction: column; width: min(100%, 1120px); height: 100vh; margin: auto; padding: 22px 28px 18px; }
+    .topbar, .composer {
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, #ffffff15, #ffffff06);
+      box-shadow: 0 16px 50px #0005, inset 0 1px #ffffff18;
+      backdrop-filter: blur(28px) saturate(155%);
+      -webkit-backdrop-filter: blur(28px) saturate(155%);
+    }
+    .topbar {
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 64px;
+      padding: 0 18px;
+      border-radius: 22px;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; font-size: 16px; font-weight: 700; letter-spacing: -.03em; }
+    .brand-mark {
+      display: grid;
+      width: 35px;
+      height: 35px;
+      place-items: center;
+      border: 1px solid #ffffff3d;
+      border-radius: 13px;
+      background: linear-gradient(145deg, #c2b5ff99, #7960e67a);
+      box-shadow: inset 0 1px #ffffff85, 0 4px 20px #9a7aff40;
+    }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .model, .new-chat {
+      color: #f2efff;
+      border: 1px solid #ffffff24;
+      background: #ffffff0b;
+      border-radius: 13px;
+    }
+    .model { padding: 9px 30px 9px 12px; outline: none; }
+    .new-chat { padding: 9px 13px; cursor: pointer; transition: background .2s, transform .2s; }
+    .new-chat:hover { background: #ffffff1b; transform: translateY(-1px); }
+    .chat {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      margin: 18px 0;
+      padding: 28px clamp(4px, 7vw, 82px);
+      scrollbar-color: #ffffff32 transparent;
+      scroll-behavior: smooth;
+    }
+    .welcome { display: grid; min-height: 100%; align-content: center; justify-items: center; padding-bottom: 5vh; text-align: center; }
+    .orb {
+      display: grid;
+      width: 76px;
+      height: 76px;
+      place-items: center;
+      margin-bottom: 22px;
+      border: 1px solid #ffffff65;
+      border-radius: 28px;
+      background: linear-gradient(145deg, #ffffff42, #9b84ff28 48%, #ffffff08);
+      box-shadow: inset 0 1px #ffffffa6, inset 0 -12px 30px #806cff20, 0 20px 70px #8570ff35;
+      backdrop-filter: blur(18px);
+      font-size: 32px;
+    }
+    .welcome h1 { margin: 0 0 10px; font-size: clamp(29px, 5vw, 43px); letter-spacing: -.055em; font-weight: 650; }
+    .welcome p { max-width: 430px; margin: 0; color: var(--muted); line-height: 1.65; }
+    .suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; margin-top: 28px; }
+    .suggestion {
+      padding: 10px 14px;
+      color: #e8e4f8;
+      border: 1px solid #ffffff20;
+      border-radius: 15px;
+      background: #ffffff09;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .suggestion:hover { border-color: #ffffff48; background: #ffffff15; }
+    .message { display: flex; gap: 13px; margin: 0 auto 25px; max-width: 780px; line-height: 1.7; }
+    .avatar {
+      flex: 0 0 34px;
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1px solid #ffffff25;
+      border-radius: 13px;
+      background: #ffffff12;
+      font-size: 12px;
+    }
+    .assistant .avatar { background: linear-gradient(145deg, #c2b5ff80, #7960e65c); }
+    .message-body { min-width: 0; flex: 1; padding: 4px 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .user .message-body {
+      flex: 0 1 auto;
+      max-width: 85%;
+      margin-left: auto;
+      padding: 10px 15px;
+      border: 1px solid #ffffff20;
+      border-radius: 18px 18px 5px 18px;
+      background: linear-gradient(135deg, #ffffff17, #ffffff0a);
+      box-shadow: inset 0 1px #ffffff17;
+      backdrop-filter: blur(16px);
+    }
+    .user { justify-content: flex-end; }
+    .user .avatar { order: 2; }
+    .pending { color: var(--muted); }
+    .composer-wrap { width: min(100%, 820px); align-self: center; }
+    .composer { display: flex; align-items: flex-end; gap: 10px; padding: 9px; border-radius: 23px; }
+    textarea {
+      flex: 1;
+      min-height: 46px;
+      max-height: 180px;
+      resize: none;
+      padding: 13px 10px;
+      border: 0;
+      outline: 0;
+      color: var(--text);
+      background: transparent;
+      line-height: 20px;
+    }
+    textarea::placeholder { color: #b7b4c9a6; }
+    .send {
+      display: grid;
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border: 1px solid #ffffff5c;
+      border-radius: 15px;
+      color: #181426;
+      background: linear-gradient(145deg, #e1d8ff, #a992ff);
+      box-shadow: inset 0 1px #fff, 0 5px 18px #9276ff42;
+      cursor: pointer;
+      transition: transform .2s, filter .2s;
+    }
+    .send:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+    .send:disabled { opacity: .5; cursor: wait; }
+    .hint { margin-top: 10px; color: #a4a2b3a8; font-size: 11px; text-align: center; }
+    @media (max-width: 600px) {
+      .app { padding: 12px 11px 12px; }
+      .topbar { min-height: 58px; padding: 0 12px; border-radius: 19px; }
+      .brand { gap: 8px; }
+      .brand-mark { width: 32px; height: 32px; }
+      .new-chat { padding: 9px 10px; }
+      .model { max-width: 132px; padding-left: 9px; }
+      .top-actions { gap: 6px; }
+      .chat { margin: 10px 0; padding: 18px 3px; }
+      .welcome { padding-bottom: 2vh; }
+      .user .message-body { max-width: 90%; }
+      .suggestion { font-size: 13px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span> Zoll</div>
+      <div class="top-actions">
+        <select class="model" id="model" aria-label="Model">
+          <option value="gpt-4o-mini">GPT-4o mini</option>
+          <option value="gpt-5-nano">GPT-5 Nano</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+        </select>
+        <button class="new-chat" id="newChat" type="button">＋ New chat</button>
+      </div>
+    </header>
+    <main class="chat" id="chat" aria-live="polite">
+      <section class="welcome" id="welcome">
+        <div class="orb" aria-hidden="true">✦</div>
+        <h1>What’s on your mind?</h1>
+        <p>A little space to explore ideas, solve problems, and make something wonderful.</p>
+        <div class="suggestions">
+          <button class="suggestion" type="button">Explain something simply</button>
+          <button class="suggestion" type="button">Help me brainstorm</button>
+          <button class="suggestion" type="button">Write a first draft</button>
+        </div>
+      </section>
+    </main>
+    <div class="composer-wrap">
+      <div class="composer">
+        <textarea id="prompt" rows="1" aria-label="Message Zoll" placeholder="Message Zoll…"></textarea>
+        <button class="send" id="send" type="button" aria-label="Send message">↑</button>
+      </div>
+      <div class="hint">Your conversation stays in this tab and clears when you leave. Responses can be inaccurate.</div>
+    </div>
+  </div>
+  <script>
+    const chatEl = document.getElementById('chat');
+    const promptEl = document.getElementById('prompt');
+    const sendEl = document.getElementById('send');
+    const modelEl = document.getElementById('model');
+    let messages = [];
+    let busy = false;
+
+    function render() {
+      if (!messages.length) {
+        chatEl.innerHTML = `
+          <section class="welcome" id="welcome">
+            <div class="orb" aria-hidden="true">✦</div>
+            <h1>What’s on your mind?</h1>
+            <p>A little space to explore ideas, solve problems, and make something wonderful.</p>
+            <div class="suggestions">
+              <button class="suggestion" type="button">Explain something simply</button>
+              <button class="suggestion" type="button">Help me brainstorm</button>
+              <button class="suggestion" type="button">Write a first draft</button>
+            </div>
+          </section>`;
+        return;
+      }
+      chatEl.innerHTML = messages.map(message => `
+        <article class="message ${message.role}">
+          <div class="avatar" aria-hidden="true">${message.role === 'user' ? 'You' : '✦'}</div>
+          <div class="message-body ${message.pending ? 'pending' : ''}">${escapeHtml(message.content)}</div>
+        </article>`).join('');
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    function escapeHtml(value) {
+      const element = document.createElement('span');
+      element.textContent = value;
+      return element.innerHTML;
+    }
+
+    async function send() {
+      const text = promptEl.value.trim();
+      if (!text || busy) return;
+      busy = true;
+      sendEl.disabled = true;
+      promptEl.value = '';
+      promptEl.style.height = '46px';
+      messages.push({ role: 'user', content: text });
+      messages.push({ role: 'assistant', content: 'Thinking…', pending: true });
+      render();
+
+      try {
+        if (!window.puter?.ai?.chat) {
+          throw new Error('The chat service did not load. Check your connection and try again.');
+        }
+        const response = await puter.ai.chat(
+          messages.slice(0, -1).map(({ role, content }) => ({ role, content })),
+          { model: modelEl.value }
+        );
+        const answer = typeof response === 'string'
+          ? response
+          : response?.message?.content;
+        if (typeof answer !== 'string' || !answer.trim()) {
+          throw new Error('The chat service returned an empty response.');
+        }
+        messages[messages.length - 1] = { role: 'assistant', content: answer };
+      } catch (error) {
+        messages[messages.length - 1] = {
+          role: 'assistant',
+          content: `Could not get a reply: ${error instanceof Error ? error.message : 'Unknown service error.'}`
+        };
+      } finally {
+        busy = false;
+        sendEl.disabled = false;
+        render();
+        promptEl.focus();
+      }
+    }
+
+    document.getElementById('newChat').addEventListener('click', () => {
+      if (busy) return;
+      messages = [];
+      render();
+      promptEl.focus();
+    });
+    document.querySelectorAll('.suggestion').forEach(button => {
+      button.addEventListener('click', () => {
+        promptEl.value = button.textContent;
+        send();
+      });
+    });
+    sendEl.addEventListener('click', send);
+    promptEl.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        send();
+      }
+    });
+    promptEl.addEventListener('input', () => {
+      promptEl.style.height = '46px';
+      promptEl.style.height = `${Math.min(promptEl.scrollHeight, 180)}px`;
+    });
+  </script>
+</body>
+</html>
